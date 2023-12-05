@@ -28,6 +28,7 @@ def replicar_a_seguidores(entrada):
     for url_seguidor in SEGUIDORES:
         try:
             response = requests.post(f"{url_seguidor}/replicar", json=entrada, timeout=5)
+            print(f"Respuesta de {url_seguidor}: {response.status_code}")  # Añadir registro de respuesta
             if response.status_code == 200:
                 confirmaciones += 1
         except requests.exceptions.RequestException as e:
