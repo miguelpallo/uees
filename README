@@ -1,1 +1,68 @@
+storage_node.py //proyecto
 
+1.- abrimos visual studio code
+2.- ejecutamos la variable de entorno 
+	python3 -m venv uees_ev 
+	source uees_ev/bin/activate                 
+
+3.- abrimos 3 terminales
+4.- ubicarnos en la carpeta
+	/Users/miguel/Desktop/SD_PROYECTO/uees/
+
+Primero:
+export NODE_ID=node_1
+export ES_LIDER=1
+export SEGUIDORES='["http://localhost:5001", "http://localhost:5002"]'
+export PUERTO=5000
+python3 storage_node.py
+
+
+Segundo:
+export NODE_ID=node_2 && export ES_LIDER=0 && export SEGUIDORES='[]' && export URL_LIDER=http://localhost:5000 && export PUERTO=5001 && python3 storage_node.py
+
+Tercero:
+export NODE_ID=node_3 && export ES_LIDER=0 && export SEGUIDORES='[]' && export URL_LIDER=http://localhost:5000 && export PUERTO=5002 && python3 storage_node.py
+
+5.- http://127.0.0.1:5000/
+6.-
+curl --location 'http://127.0.0.1:5000/escribir' \
+--header 'Content-Type: application/json' \
+--data '{"clave":"valor"}'
+
+
+El código muestra que la misma aplicación puede actuar tanto como líder como seguidor. El estado de líder se determina por la variable de entorno ES_LIDER. Según el valor de esta variable, el nodo asumirá el comportamiento de líder o seguidor. Por lo tanto, cumple con el requisito de que una sola aplicación funcione en ambos roles.
+
+
+La coordinación de réplicas se realiza mediante solicitudes HTTP POST y GET entre el nodo líder y los seguidores. Las rutas /escribir y /replicar en el código de Flask manejan la recepción de datos para la escritura y replicación, respectivamente. La comunicación directa y los mensajes intercambiados deben documentarse en el reporte y mostrarse en el video para cumplir completamente con este criterio.
+
+
+Cada nodo escribe operaciones en un archivo de log, cumpliendo con el requisito de mantener un registro de todas las operaciones de escritura. La replicación ocurre cuando el líder intenta replicar los datos a los seguidores y espera un número mínimo de confirmaciones antes de responder al cliente. Este comportamiento cumple con el requisito de replicación (ya sea síncrona o asíncrona) en el sentido de que el cliente solo recibe una respuesta después de que se ha confirmado el número mínimo de replicaciones.
+
+
+El sistema parece manejar la desconexión temporal de nodos a través de la función heartbeat, la cual verifica la disponibilidad de los nodos. En caso de no recibir respuesta del líder, se indica que se iniciaría un proceso de elección de líder, aunque este proceso no está implementado en el código proporcionado. El código no muestra claramente cómo maneja la adición de nuevos nodos seguidores o la desconexión permanente del nodo líder. La implementación completa y la explicación de estos escenarios deben estar claramente definidos en el reporte PDF y demostrados en el video para cumplir con este criterio.
+
+Importaciones y Configuraciones Iniciales
+
+Se importan las bibliotecas necesarias como threading, json, os, Flask, request, jsonify, y requests.
+Se configura una aplicación Flask y se definen algunas variables globales como HEARTBEAT_TIMEOUT, HEARTBEAT_INTERVAL, NODE_ID, ES_LIDER, ARCHIVO_LOG, SEGUIDORES, y URL_LIDER.
+Funciones de Utilidad
+agregar_al_registro: Guarda entradas en un archivo de registro.
+replicar_a_seguidores: Envía datos a nodos seguidores para replicar la información. Gestiona confirmaciones de replicación y errores.
+Rutas de Flask
+/escribir: Solo accesible por el líder. Recibe datos para escribir y replicar a los seguidores.
+index: Ruta básica para comprobar la conectividad del servidor.
+/heartbeat: Permite comprobar si un nodo está activo.
+/replicar: Utilizada por los seguidores para replicar datos recibidos del líder.
+Función de Heartbeat
+heartbeat: Función que se ejecuta en un hilo separado. Si el nodo es líder, verifica periódicamente la disponibilidad de los seguidores. Si el nodo es un seguidor, verifica la disponibilidad del líder.
+Simulación de Falla de Nodo
+simular_falla_nodo: Simula una desconexión y reconexión de un nodo, incluyendo la posibilidad de cambiar el estado de líder.
+Inicio del Servidor y Thread de Heartbeat
+Se inicia el hilo de heartbeat.
+Se configura el servidor Flask con las variables de entorno y se inicia.
+Comportamiento General del Código
+El sistema está diseñado para funcionar en un entorno de almacenamiento distribuido, donde un nodo líder maneja las escrituras y las réplicas en los nodos seguidores.
+Hay una funcionalidad de heartbeat para mantener la salud del sistema y detectar fallas en los nodos.
+La lógica de replicación asegura que los datos se mantengan consistentes entre los nodos.
+El código incluye manejo de errores y simulación de fallas de nodos para probar la robustez del sistema.
+Este es un resumen detallado de cómo funciona el código, especialmente en cómo se gestionan las relaciones entre el líder y los seguidores en un sistema distribuido.
