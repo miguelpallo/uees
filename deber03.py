@@ -117,3 +117,6 @@ if __name__ == '__main__':
     
     # Iniciar el servidor Flask
     app.run(port=int(os.getenv('PUERTO', '5000')))
+
+
+    # funcional
